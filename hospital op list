@@ -1,0 +1,33 @@
+class HospitalOPSystem:
+    def __init__(self):
+        self.current_op_number = 0
+        self.patients = []
+
+    def register_patient(self, patient_name):
+        """Assigns a new OP number to the patient"""
+        self.current_op_number += 1
+        op_entry = {
+            "op_number": self.current_op_number,
+            "patient_name": patient_name
+        }
+        self.patients.append(op_entry)
+        return op_entry
+
+    def show_all_patients(self):
+        """Displays all registered patients with OP numbers"""
+        for p in self.patients:
+            print(f"OP No: {p['op_number']} | Name: {p['patient_name']}")
+
+# Example usage
+if __name__ == "__main__":
+    hospital = HospitalOPSystem()
+
+    while True:
+        name = input("Enter patient name (or 'exit' to stop): ")
+        if name.lower() == "exit":
+            break
+        patient = hospital.register_patient(name)
+        print(f"Patient Registered: {patient['patient_name']} | OP Number: {patient['op_number']}")
+
+    print("\nAll Registered Patients:")
+    hospital.show_all_patients()
