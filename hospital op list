@@ -1,33 +1,82 @@
+
 class HospitalOPSystem:
     def __init__(self):
         self.current_op_number = 0
         self.patients = []
+        self.next_index = 0  # Tracks who is next to visit
 
     def register_patient(self, patient_name):
         """Assigns a new OP number to the patient"""
         self.current_op_number += 1
         op_entry = {
             "op_number": self.current_op_number,
-            "patient_name": patient_name
+            "patient_name": patient_name,
+            "status": "waiting"  # waiting, visiting, out
         }
         self.patients.append(op_entry)
         return op_entry
 
     def show_all_patients(self):
-        """Displays all registered patients with OP numbers"""
+        """Displays all registered patients with OP numbers and status"""
         for p in self.patients:
-            print(f"OP No: {p['op_number']} | Name: {p['patient_name']}")
+            print(f"OP No: {p['op_number']} | Name: {p['patient_name']} | Status: {p['status']}")
+
+    def announce_next_patient(self):
+        """Announces the next patient if available"""
+        while self.next_index < len(self.patients):
+            patient = self.patients[self.next_index]
+            if patient["status"] == "waiting":
+                patient["status"] = "visiting"
+                print(f"Next Patient: OP No {patient['op_number']} | Name: {patient['patient_name']}")
+                return patient
+            self.next_index += 1
+        print("No more patients waiting.")
+        return None
+
+    def patient_out(self, op_number):
+        """Marks a patient as out after visiting"""
+        for patient in self.patients:
+            if patient["op_number"] == op_number:
+                if patient["status"] == "visiting":
+                    patient["status"] = "out"
+                    print(f"Patient OP No {op_number} ({patient['patient_name']}) is now OUT.")
+                    self.next_index += 1
+                    return True
+                else:
+                    print(f"Patient OP No {op_number} is not currently visiting.")
+                    return False
+        print(f"Patient OP No {op_number} not found.")
+        return False
+
 
 # Example usage
 if __name__ == "__main__":
     hospital = HospitalOPSystem()
 
     while True:
-        name = input("Enter patient name (or 'exit' to stop): ")
-        if name.lower() == "exit":
-            break
-        patient = hospital.register_patient(name)
-        print(f"Patient Registered: {patient['patient_name']} | OP Number: {patient['op_number']}")
+        action = input("\nChoose action: register / next / out / list / exit: ").lower()
 
-    print("\nAll Registered Patients:")
-    hospital.show_all_patients()
+        if action == "register":
+            name = input("Enter patient name: ")
+            patient = hospital.register_patient(name)
+            print(f"Patient Registered: {patient['patient_name']} | OP Number: {patient['op_number']}")
+
+        elif action == "next":
+            hospital.announce_next_patient()
+
+        elif action == "out":
+            try:
+                op_no = int(input("Enter OP number of patient leaving: "))
+                hospital.patient_out(op_no)
+            except ValueError:
+                print("Invalid OP number.")
+
+        elif action == "list":
+            print("\nAll Registered Patients:")
+            hospital.show_all_patients()
+
+        elif action == "exit":
+            break
+
+        else:
+            print("Invalid option. Try again.")
